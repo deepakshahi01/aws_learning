@@ -1,0 +1,41 @@
+services:
+  cm_frontend:
+    image: devdeepak07/cmfront
+    container_name: cm-frontend
+    ports:
+      - "7080:80"
+    depends_on:
+     - backend
+
+  backend:
+    image: devdeepak07/cmbackend
+    container_name: cm-backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://devops:mycmapp@cm_database:5432/contact_db
+    ports:
+      - "7002:8000"
+    command: >
+     sh -c "sleep 10 && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    depends_on:
+      cm_database:
+        condition: service_healthy
+
+  cm_database:
+    image: postgres:15
+    container_name: postgres
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_PASSWORD: mycmapp
+      POSTGRES_USER: devops
+      POSTGRES_DB: contact_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devops -d contact_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:

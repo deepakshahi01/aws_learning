@@ -1,0 +1,33 @@
+- name: setup webserver
+  hosts: vm
+  become: yes
+  tasks:
+    - name: install nginx webserver
+      apt:
+        name: nginx
+        state: present
+    - name: ensure nginx is started
+      service: 
+        name: nginx
+        state: started
+        enabled: yes
+    - name: copy config file to webserver
+      ansible.builtin.copy:
+        src: ./deepak.conf
+        dest: /etc/nginx/conf.d/
+    - name: copy config file to webserver
+      ansible.builtin.copy:
+        src: ./deepak-api.conf
+        dest: /etc/nginx/conf.d/
+    - name: ensure nginx is reloaded
+      service: 
+        name: nginx
+        state: reloaded
+    - name: copy config file to webserver
+      ansible.builtin.copy:
+        src: ./docker-compose.yaml
+        dest: /home/ubuntu/
+    - name: run docker-compose using shell
+      ansible.builtin.shell: docker compose up -d
+      args:
+        chdir: /home/ubuntu/
