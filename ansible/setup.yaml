@@ -17,6 +17,7 @@
           - curl
           - software-properties-common
           - gnupg
+          - socat
         state: present
 
     - name: Create directory for Docker GPG key
@@ -77,3 +78,16 @@
         url: "https://dl.k8s.io/release/v1.35.0/bin/linux/amd64/kubectl"
         dest: /usr/local/bin/kubectl
         mode: '0755'
+
+    - name: download and install cloud provider kind
+      ansible.builtin.get_url:
+        url: "https://github.com/kubernetes-sigs/cloud-provider-kind/releases/download/v0.10.0/cloud-provider-kind_0.10.0_windows_amd64.tar.gz"
+        dest: /home/ubuntu
+        mode: '0755'
+    
+    - name: extract and install cloud provider kind
+      shell: |
+        tar -xvf cloud-provider-kind_0.10.0_windows_amd64.tar.gz
+        sudo mv cloud-provider-kind /usr/local/bin
+      args:
+        chdir: /home/ubuntu/

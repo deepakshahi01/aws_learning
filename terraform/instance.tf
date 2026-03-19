@@ -20,6 +20,9 @@ resource "aws_instance" "deepak-instance" {
   key_name                    = aws_key_pair.deepak-key.key_name
   subnet_id                   = aws_subnet.deepak-subnet.id
   vpc_security_group_ids      = [aws_security_group.deepak-sg.id]
+  root_block_device {
+    volume_size = 32
+  }
   associate_public_ip_address = true
   tags = {
     Name = "deepak-instance"

@@ -1,0 +1,37 @@
+---
+- name: Setup kubernetes
+  hosts: vm
+  become: yes
+  tasks:
+  - name: copy kind config to server
+    ansible.builtin.copy:
+        src: ./kind-config.yaml
+        dest: /home/ubuntu/
+
+
+  - name: check kind cluster
+    shell: kind get clusters
+    register: kind_clusters
+    ignore_errors: yes
+  - name: run kind-config using shell
+    ansible.builtin.shell: kind create cluster --config kind-config.yaml
+    args:
+      chdir: /home/ubuntu/
+    when: " 'kind' not in kind_clusters.stdout"
+
+  - name: Export kubeconfig
+    shell: kind export kubeconfig --name kind
+    become_user: ubuntu
+
+  - name: copy kind config to server
+    ansible.builtin.copy:
+        src: ./nginx-ingress.yaml
+        dest: /home/ubuntu/
+
+  - name: install nginx ingress cluster on kubernetes
+    shell: kubectl apply -f nginx-ingress.yaml
+    args:
+      chdir: /home/ubuntu/
+
+  
+
